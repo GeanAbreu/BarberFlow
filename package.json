@@ -1,13 +1,21 @@
 {
   "name": "barberflow",
   "private": true,
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "concurrently -n api,web -c yellow,cyan \"npm run dev -w @barberflow/api\" \"npm run dev -w @barberflow/web\"",
+    "dev:local": "concurrently -k -n db,api,web -c green,yellow,cyan \"npm run db:local\" \"npm run dev -w @barberflow/api\" \"npm run dev -w @barberflow/web\"",
+    "db:local": "node scripts/local-db.mjs",
+    "db:local:setup": "node scripts/setup-local.mjs",
     "build": "npm run build -w @barberflow/api && npm run build -w @barberflow/web",
     "db:generate": "npm run db:generate -w @barberflow/api",
     "db:migrate": "npm run db:migrate -w @barberflow/api",
     "db:seed": "npm run db:seed -w @barberflow/api"
   },
-  "devDependencies": { "concurrently": "^9.2.1" }
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "embedded-postgres": "^18.4.0-beta.17"
+  }
 }

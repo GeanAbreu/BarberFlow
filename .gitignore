@@ -1,5 +1,6 @@
 node_modules
 .npm-cache
+.local-data
 .next
 dist
 .env

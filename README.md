@@ -25,6 +25,10 @@ Sistema interno de gestão de barbearia em um monorepositório npm workspaces.
 5. Inicie a interface e a API com `npm run dev`.
 6. Acesse [http://localhost:3000](http://localhost:3000) e entre com `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD`.
 
+### Windows sem Docker
+
+Execute `npm run db:local:setup` para gerar credenciais locais em `apps/api/.env` (a senha inicial é exibida uma vez). Inicie o PostgreSQL real com `npm run db:local` e deixe esse terminal aberto. Em outro terminal, execute `npm run db:migrate`, `npm run db:seed` e `npm run dev`. Os arquivos de dados ficam em `.local-data/postgres` e não são versionados.
+
 O seed cria a conta administradora e três serviços básicos. Execute-o depois da migração. O cadastro de barbeiros é restrito ao administrador.
 
 ## Segurança e regras
