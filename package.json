@@ -1,0 +1,13 @@
+{
+  "name": "barberflow",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently -n api,web -c yellow,cyan \"npm run dev -w @barberflow/api\" \"npm run dev -w @barberflow/web\"",
+    "build": "npm run build -w @barberflow/api && npm run build -w @barberflow/web",
+    "db:generate": "npm run db:generate -w @barberflow/api",
+    "db:migrate": "npm run db:migrate -w @barberflow/api",
+    "db:seed": "npm run db:seed -w @barberflow/api"
+  },
+  "devDependencies": { "concurrently": "^9.2.1" }
+}

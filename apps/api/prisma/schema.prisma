@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  BARBEIRO
+}
+
+enum AppointmentStatus {
+  AGENDADO
+  EM_ANDAMENTO
+  CONCLUIDO
+  CANCELADO
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  phone        String?
+  role         Role          @default(BARBEIRO)
+  commission   Decimal       @default(40) @db.Decimal(5, 2)
+  workStart    String        @default("09:00")
+  workEnd      String        @default("19:00")
+  active       Boolean       @default(true)
+  appointments Appointment[] @relation("BarberAppointments")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Client {
+  id           String        @id @default(uuid())
+  name         String
+  phone        String?
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+}
+
+model Service {
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  duration     Int
+  price        Decimal       @db.Decimal(10, 2)
+  active       Boolean       @default(true)
+  appointments Appointment[]
+}
+
+model Appointment {
+  id        String            @id @default(uuid())
+  date      DateTime
+  status    AppointmentStatus @default(AGENDADO)
+  barberId  String
+  barber    User              @relation("BarberAppointments", fields: [barberId], references: [id])
+  clientId  String
+  client    Client            @relation(fields: [clientId], references: [id])
+  serviceId String
+  service   Service           @relation(fields: [serviceId], references: [id])
+  createdAt DateTime          @default(now())
+
+  @@index([barberId, date])
+  @@index([date, status])
+}
