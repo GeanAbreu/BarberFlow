@@ -6,7 +6,7 @@ Sistema interno de gestão de barbearia em um monorepositório npm workspaces.
 
 | Pasta | Responsabilidade |
 | --- | --- |
-| `apps/web` | Next.js App Router, React, TypeScript e interface responsiva |
+| `apps/web` | Next.js App Router, React, TypeScript, Tailwind CSS, Recharts e interface responsiva |
 | `apps/api` | Express, autenticação JWT, autorização, regras de negócio e Prisma |
 | `apps/api/prisma` | Schema PostgreSQL e seed inicial |
 
@@ -35,16 +35,22 @@ O seed cria a conta administradora e três serviços básicos. Execute-o depois 
 
 - Senhas com bcrypt; sessão JWT de 12 horas em cookie HTTP-only.
 - Validação com Zod, limite de tentativas no login, Helmet e CORS restrito.
-- A API restringe agenda e rendimentos do barbeiro ao próprio usuário.
+- A API restringe agenda e rendimentos do barbeiro ao próprio usuário. Todas as rotas financeiras globais e de exportação exigem `ADMIN`.
 - Serviços e barbeiros são desativados em vez de apagar seu histórico.
 - Um horário conflitante para o mesmo barbeiro retorna HTTP 409. Um bloqueio transacional por barbeiro evita conflitos em solicitações simultâneas.
-- Valores financeiros usam apenas agendamentos concluídos. A comissão é calculada com a taxa atual cadastrada para o barbeiro.
+- Preço e taxa de comissão são registrados no agendamento para preservar o histórico. Dados anteriores à migração usam os valores atuais como alternativa.
+- O caixa considera serviços concluídos e mensalidades pagas. Atendimentos cobertos por assinatura geram produção e comissão, sem duplicar a receita recebida.
+- Planos de assinatura definem serviços incluídos e limite mensal de visitas. O agendamento valida mensalidade paga, serviço, cliente e saldo de visitas.
 
 ## Rotas
 
-Interface: `/login`, `/agenda`, `/servicos`, `/barbeiros`, `/financeiro`, `/cadastro`.
+Interface: `/login`, `/agenda`, `/servicos`, `/barbeiros`, `/assinaturas`, `/financeiro`, `/cadastro`.
 
-API: `/auth/login`, `/auth/logout`, `/auth/me`, `/users`, `/services`, `/clients`, `/appointments`, `/finance` e `/health`.
+API: `/auth/login`, `/auth/logout`, `/auth/me`, `/users`, `/services`, `/clients`, `/appointments`, `/subscription-plans`, `/subscriptions`, `/subscription-payments/:id/pay`, `/earnings/me`, `/finance`, `/finance/dashboard`, `/finance/export.csv` e `/health`.
+
+O painel `/financeiro` mostra faturamento do dia, semana e mês, ticket médio, atendimentos concluídos, série diária, distribuição por serviço e comissões por barbeiro. Há filtros de semana, últimos 15 dias, mês e intervalo personalizado. A exportação CSV contém atendimentos e mensalidades do período.
+
+Para verificar o fluxo de assinaturas, a autorização do financeiro e a exportação, execute `npm run test:subscriptions --workspace apps/api` com API e banco iniciados. O teste cria registros temporários e os remove ao final.
 
 ## Atualização da agenda
 

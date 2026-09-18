@@ -19,6 +19,17 @@ enum AppointmentStatus {
   CANCELADO
 }
 
+enum SubscriptionStatus {
+  ATIVA
+  PAUSADA
+  CANCELADA
+}
+
+enum SubscriptionPaymentStatus {
+  PENDENTE
+  PAGO
+}
+
 model User {
   id           String        @id @default(uuid())
   name         String
@@ -40,7 +51,57 @@ model Client {
   name         String
   phone        String?
   appointments Appointment[]
+  subscriptions ClientSubscription[]
   createdAt    DateTime      @default(now())
+}
+
+model SubscriptionPlan {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  visitsPerMonth Int    @default(1)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  services    Service[] @relation("PlanServices")
+  subscriptions ClientSubscription[]
+}
+
+model ClientSubscription {
+  id         String             @id @default(uuid())
+  clientId   String
+  client     Client             @relation(fields: [clientId], references: [id])
+  planId     String
+  plan       SubscriptionPlan   @relation(fields: [planId], references: [id])
+  price      Decimal            @db.Decimal(10, 2)
+  visitsPerMonth Int
+  includedServices Service[] @relation("SubscriptionServices")
+  billingDay Int
+  startDate  DateTime
+  billingFrom DateTime
+  status     SubscriptionStatus @default(ATIVA)
+  payments   SubscriptionPayment[]
+  appointments Appointment[]
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@index([clientId, status])
+}
+
+model SubscriptionPayment {
+  id             String                    @id @default(uuid())
+  subscriptionId String
+  subscription   ClientSubscription        @relation(fields: [subscriptionId], references: [id])
+  period         String
+  dueDate        DateTime
+  amount         Decimal                   @db.Decimal(10, 2)
+  status         SubscriptionPaymentStatus @default(PENDENTE)
+  paidAt         DateTime?
+  createdAt      DateTime                  @default(now())
+
+  @@unique([subscriptionId, period])
+  @@index([status, dueDate])
+  @@index([paidAt])
 }
 
 model Service {
@@ -51,20 +112,27 @@ model Service {
   price        Decimal       @db.Decimal(10, 2)
   active       Boolean       @default(true)
   appointments Appointment[]
+  plans        SubscriptionPlan[] @relation("PlanServices")
+  subscriptionEntitlements ClientSubscription[] @relation("SubscriptionServices")
 }
 
 model Appointment {
   id        String            @id @default(uuid())
   date      DateTime
   status    AppointmentStatus @default(AGENDADO)
+  priceAtBooking Decimal? @db.Decimal(10, 2)
+  commissionAtBooking Decimal? @db.Decimal(5, 2)
   barberId  String
   barber    User              @relation("BarberAppointments", fields: [barberId], references: [id])
   clientId  String
   client    Client            @relation(fields: [clientId], references: [id])
   serviceId String
   service   Service           @relation(fields: [serviceId], references: [id])
+  subscriptionId String?
+  subscription ClientSubscription? @relation(fields: [subscriptionId], references: [id])
   createdAt DateTime          @default(now())
 
   @@index([barberId, date])
   @@index([date, status])
+  @@index([subscriptionId, date])
 }

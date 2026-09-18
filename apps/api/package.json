@@ -7,7 +7,8 @@
     "start": "node dist/server.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "test:subscriptions": "node tests/subscriptions-smoke.cjs"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
