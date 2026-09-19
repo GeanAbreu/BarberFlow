@@ -1,0 +1,2 @@
+import{Router}from'express';import{admin,auth}from'../../core/auth';import{wrap}from'../../core/errors';import{usersController}from'./users.controller';
+export const usersRouter=Router();usersRouter.get('/users',auth,wrap(usersController.list));usersRouter.post('/users',auth,admin,wrap(usersController.create));usersRouter.patch('/users/:id',auth,admin,wrap(usersController.update));usersRouter.delete('/users/:id',auth,admin,wrap(usersController.remove));

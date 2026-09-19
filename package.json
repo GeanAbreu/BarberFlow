@@ -10,6 +10,8 @@
     "db:local": "node scripts/local-db.mjs",
     "db:local:setup": "node scripts/setup-local.mjs",
     "build": "npm run build -w @barberflow/api && npm run build -w @barberflow/web",
+    "test": "npm run test -w @barberflow/api",
+    "test:e2e": "npm run test:e2e -w @barberflow/web",
     "db:generate": "npm run db:generate -w @barberflow/api",
     "db:migrate": "npm run db:migrate -w @barberflow/api",
     "db:seed": "npm run db:seed -w @barberflow/api"

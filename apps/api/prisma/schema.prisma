@@ -30,6 +30,21 @@ enum SubscriptionPaymentStatus {
   PAGO
 }
 
+enum PaymentMethod {
+  DINHEIRO
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  OUTRO
+}
+
+enum ReminderStatus {
+  PENDENTE
+  ENVIADO
+  FALHOU
+  IGNORADO
+}
+
 model User {
   id           String        @id @default(uuid())
   name         String
@@ -42,6 +57,9 @@ model User {
   workEnd      String        @default("19:00")
   active       Boolean       @default(true)
   appointments Appointment[] @relation("BarberAppointments")
+  scheduleBlocks ScheduleBlock[]
+  expenses     Expense[]      @relation("ExpenseCreator")
+  cashClosings CashClosing[]  @relation("CashClosingUser")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -52,6 +70,7 @@ model Client {
   phone        String?
   appointments Appointment[]
   subscriptions ClientSubscription[]
+  notes        String?
   createdAt    DateTime      @default(now())
 }
 
@@ -97,6 +116,7 @@ model SubscriptionPayment {
   amount         Decimal                   @db.Decimal(10, 2)
   status         SubscriptionPaymentStatus @default(PENDENTE)
   paidAt         DateTime?
+  paymentMethod  PaymentMethod?
   createdAt      DateTime                  @default(now())
 
   @@unique([subscriptionId, period])
@@ -122,6 +142,7 @@ model Appointment {
   status    AppointmentStatus @default(AGENDADO)
   priceAtBooking Decimal? @db.Decimal(10, 2)
   commissionAtBooking Decimal? @db.Decimal(5, 2)
+  paymentMethod PaymentMethod?
   barberId  String
   barber    User              @relation("BarberAppointments", fields: [barberId], references: [id])
   clientId  String
@@ -130,9 +151,66 @@ model Appointment {
   service   Service           @relation(fields: [serviceId], references: [id])
   subscriptionId String?
   subscription ClientSubscription? @relation(fields: [subscriptionId], references: [id])
+  reminder  AppointmentReminder?
   createdAt DateTime          @default(now())
 
   @@index([barberId, date])
   @@index([date, status])
   @@index([subscriptionId, date])
+}
+
+model ScheduleBlock {
+  id        String   @id @default(uuid())
+  barberId  String
+  barber    User     @relation(fields: [barberId], references: [id])
+  start     DateTime
+  end       DateTime
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([barberId, start, end])
+}
+
+model Expense {
+  id            String        @id @default(uuid())
+  description   String
+  category      String
+  amount        Decimal       @db.Decimal(10, 2)
+  date          DateTime
+  paymentMethod PaymentMethod
+  createdById   String
+  createdBy     User          @relation("ExpenseCreator", fields: [createdById], references: [id])
+  createdAt     DateTime      @default(now())
+
+  @@index([date])
+}
+
+model CashClosing {
+  id              String   @id @default(uuid())
+  businessDate    String   @unique
+  openingAmount   Decimal  @db.Decimal(10, 2)
+  expectedAmount  Decimal  @db.Decimal(10, 2)
+  actualAmount    Decimal  @db.Decimal(10, 2)
+  difference      Decimal  @db.Decimal(10, 2)
+  revenue         Decimal  @db.Decimal(10, 2)
+  expenses        Decimal  @db.Decimal(10, 2)
+  notes           String?
+  closedById      String
+  closedBy        User     @relation("CashClosingUser", fields: [closedById], references: [id])
+  closedAt        DateTime @default(now())
+}
+
+model AppointmentReminder {
+  id          String         @id @default(uuid())
+  appointmentId String       @unique
+  appointment Appointment    @relation(fields: [appointmentId], references: [id])
+  scheduledFor DateTime
+  status      ReminderStatus @default(PENDENTE)
+  destination String
+  providerId  String?
+  error       String?
+  sentAt      DateTime?
+  createdAt   DateTime       @default(now())
+
+  @@index([status, scheduledFor])
 }

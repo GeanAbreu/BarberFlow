@@ -1,0 +1,2 @@
+import{prisma}from'../../core/database';import{publicUser}from'../../core/auth';
+export const usersRepository={list:(where:object)=>prisma.user.findMany({where,select:publicUser,orderBy:{name:'asc'}}),find:(id:string)=>prisma.user.findUnique({where:{id}}),create:(data:any)=>prisma.user.create({data,select:publicUser}),update:(id:string,data:any)=>prisma.user.update({where:{id,role:'BARBEIRO'},data,select:publicUser}),deactivate:(id:string)=>prisma.user.update({where:{id,role:'BARBEIRO'},data:{active:false}})};

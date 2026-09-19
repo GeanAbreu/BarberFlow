@@ -1,0 +1,2 @@
+import{Router}from'express';import rateLimit from'express-rate-limit';import{auth}from'../../core/auth';import{wrap}from'../../core/errors';import{authController}from'./auth.controller';
+export const authRouter=Router();authRouter.post('/auth/login',rateLimit({windowMs:15*60*1000,limit:10,standardHeaders:'draft-7',legacyHeaders:false}),wrap(authController.login));authRouter.post('/auth/logout',wrap(authController.logout));authRouter.get('/auth/me',auth,wrap(authController.me));

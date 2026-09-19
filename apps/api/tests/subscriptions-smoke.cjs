@@ -74,7 +74,7 @@ async function main() {
     await call(`/subscriptions/${subscriptionId}`, 'PATCH', { status: 'ATIVA' });
     console.log('Assinaturas, agenda, relatório, CSV e RBAC financeiro OK.');
   } finally {
-    if (appointmentId) await prisma.appointment.delete({ where: { id: appointmentId } });
+    if (appointmentId) { await prisma.appointmentReminder.deleteMany({ where: { appointmentId } }); await prisma.appointment.delete({ where: { id: appointmentId } }); }
     if (subscriptionId) { await prisma.subscriptionPayment.deleteMany({ where: { subscriptionId } }); await prisma.clientSubscription.delete({ where: { id: subscriptionId } }); }
     if (clientId) await prisma.client.delete({ where: { id: clientId } });
     if (barberId) await prisma.user.delete({ where: { id: barberId } });

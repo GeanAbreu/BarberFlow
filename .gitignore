@@ -6,3 +6,6 @@ dist
 .env
 .env.local
 *.tsbuildinfo
+test-results
+playwright-report
+blob-report

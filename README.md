@@ -7,6 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma)](https://www.prisma.io/)
+[![CI](https://github.com/GeanAbreu/BarberFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/GeanAbreu/BarberFlow/actions/workflows/ci.yml)
 
 O **BarberFlow** centraliza a operação diária de uma barbearia: equipe, catálogo de serviços, clientes, agenda, planos recorrentes, pagamentos, faturamento e comissões. A aplicação separa a experiência do administrador da visão operacional do barbeiro e aplica as mesmas permissões na interface e na API.
 
@@ -25,7 +26,7 @@ O projeto foi desenvolvido com foco em regras de negócio reais, consistência f
 ### Agenda operacional
 
 - Agenda diária organizada em colunas por barbeiro.
-- Navegação por data e atualização automática a cada 15 segundos.
+- Navegação por data e atualização instantânea com Server-Sent Events.
 - Cadastro rápido de cliente e agendamento no mesmo fluxo.
 - Estados `AGENDADO`, `EM_ANDAMENTO`, `CONCLUIDO` e `CANCELADO`.
 - Validação de conflito de horários com bloqueio transacional no PostgreSQL.
@@ -59,6 +60,16 @@ O projeto foi desenvolvido com foco em regras de negócio reais, consistência f
 - Consolidação de serviços avulsos e mensalidades pagas sem duplicar receita.
 - Exportação do período em CSV com proteção contra formula injection.
 
+### Operação comercial
+
+- Registro de despesas por categoria, data e forma de pagamento.
+- Fluxo de caixa com receitas, despesas e saldo operacional.
+- Fechamento diário com fundo inicial, valor esperado, valor contado e diferença.
+- Formas de pagamento para serviços e mensalidades: dinheiro, PIX, crédito, débito e outros.
+- Folgas e bloqueios de agenda validados antes da criação do atendimento.
+- Histórico do cliente com serviços, profissionais, assinaturas e pagamentos.
+- Fila de lembretes preparada para WhatsApp Cloud API, sem credenciais no código.
+
 ### Experiência visual
 
 - Interface responsiva em dark mode.
@@ -69,6 +80,8 @@ O projeto foi desenvolvido com foco em regras de negócio reais, consistência f
 ## Arquitetura
 
 O repositório usa **npm workspaces** para manter frontend e backend independentes, compartilhando instalação, scripts e versionamento.
+
+A API é organizada por domínio. Cada módulo expõe suas rotas e, conforme a complexidade, separa controllers, services e repositories. O arquivo `server.ts` apenas configura os middlewares e compõe os módulos.
 
 ```mermaid
 flowchart LR
@@ -114,7 +127,7 @@ BarberFlow/
 | Autenticação | JWT, cookie HTTP-only, bcrypt |
 | Segurança | Helmet, CORS restrito, rate limiting, RBAC e validação de origem |
 | Infra local | Docker Compose ou PostgreSQL embarcado no Windows |
-| Qualidade | TypeScript strict, builds de produção, teste integrado e npm audit |
+| Qualidade | TypeScript strict, Vitest, Supertest, Playwright, CI e npm audit |
 
 ## Modelo de domínio
 
@@ -216,6 +229,8 @@ O comando de setup gera credenciais locais e exibe a senha inicial uma vez. Os d
 | `SEED_ADMIN_EMAIL` | E-mail do administrador criado pelo seed |
 | `SEED_ADMIN_PASSWORD` | Senha inicial do administrador |
 | `NEXT_PUBLIC_API_URL` | URL pública da API consumida pelo frontend |
+| `WHATSAPP_ACCESS_TOKEN` | Token da WhatsApp Cloud API; opcional no ambiente local |
+| `WHATSAPP_PHONE_NUMBER_ID` | Identificador do remetente na WhatsApp Cloud API |
 
 ## Scripts principais
 
@@ -228,6 +243,8 @@ O comando de setup gera credenciais locais e exibe a senha inicial uma vez. Os d
 | `npm run db:seed` | Cria administrador e serviços iniciais |
 | `npm run db:local:setup` | Prepara ambiente e banco local no Windows |
 | `npm run test:subscriptions --workspace apps/api` | Valida assinaturas, agenda, financeiro, CSV e RBAC |
+| `npm test` | Executa os testes integrados da API com Vitest e Supertest |
+| `npm run test:e2e` | Executa os fluxos de interface com Playwright e Chromium |
 
 ## Rotas da aplicação
 
@@ -238,6 +255,7 @@ O comando de setup gera credenciais locais e exibe a senha inicial uma vez. Os d
 | `/servicos` | Catálogo e preços | ADMIN |
 | `/barbeiros` | Equipe, expediente e comissão | ADMIN |
 | `/assinaturas` | Planos, assinantes e mensalidades | ADMIN |
+| `/operacao` | Despesas, fluxo de caixa, fechamentos, bloqueios e histórico | ADMIN |
 | `/financeiro` | Caixa, gráficos, relatórios e exportação | ADMIN |
 | `/cadastro` | Cadastro de profissionais | ADMIN |
 
@@ -247,7 +265,8 @@ Com o PostgreSQL e a API em execução:
 
 ```bash
 npm run build
-npm run test:subscriptions --workspace apps/api
+npm test
+npm run test:e2e
 npm audit
 ```
 
@@ -265,3 +284,5 @@ O teste integrado cria dados temporários, percorre o fluxo de assinatura e agen
 ---
 
 Desenvolvido como um projeto full stack de portfólio, demonstrando arquitetura, modelagem relacional, autenticação, autorização, regras financeiras, concorrência e construção de interfaces orientadas à operação.
+
+Consulte o [roadmap do projeto](ROADMAP.md) para ver as entregas e os próximos marcos.
