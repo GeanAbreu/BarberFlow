@@ -3,7 +3,7 @@
 ## Entregue
 
 - Autenticação JWT e autorização por perfil.
-- Agenda diária com atualização em tempo real por Server-Sent Events.
+- Agenda diária com Server-Sent Events.
 - Controle transacional de conflitos e consumo de assinaturas.
 - Serviços, clientes, equipe, expediente e comissões.
 - Planos recorrentes, mensalidades e franquia de visitas.
@@ -13,14 +13,16 @@
 - Folgas e bloqueios de agenda.
 - Histórico detalhado do cliente.
 - Fila de lembretes com adaptador para WhatsApp Cloud API.
-- API modular por domínio com controllers, services e repositories.
-- Testes integrados da API e testes de interface com Playwright.
-- Pipeline de integração contínua.
+- API modular por domínio.
+- Testes integrados, Playwright e pipeline de CI.
+- Documentação funcional, técnica, UML e DER.
 
 ## Próximas versões
 
 ### v1.1 — Comunicação
 
+- Validação rígida de agendamentos contra o expediente cadastrado.
+- Matriz explícita de transições de estado do atendimento.
 - Templates aprovados pela Meta para lembretes automáticos.
 - Retentativas com backoff e processamento assíncrono da fila.
 - Confirmação e cancelamento pelo cliente.
@@ -28,8 +30,9 @@
 ### v1.2 — Inteligência operacional
 
 - Comparativos por período e metas por profissional.
-- Taxa de ocupação, cancelamento e recorrência de clientes.
+- Taxa de ocupação, cancelamento e recorrência.
 - Projeção de receita recorrente.
+- Exportação de relatórios em PDF.
 
 ### v1.3 — Produto
 
@@ -38,6 +41,6 @@
 - Auditoria de alterações administrativas.
 - Aplicativo instalável com recursos de PWA.
 
-## Critérios de qualidade
+## Critérios de evolução
 
-Cada versão deve manter builds de produção, migrations reproduzíveis, testes de autorização e regras financeiras, auditoria de dependências e documentação atualizada.
+Cada versão deve manter builds de produção, migrations reproduzíveis, testes de autorização e regras financeiras, auditoria de dependências e documentação sincronizada com a implementação.
